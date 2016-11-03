@@ -1,0 +1,29 @@
+.board {
+    background-color: grey;
+    width: 700px;
+    height: 500px;
+    margin: 200px auto 40px auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.controls {
+	width: 700px;
+	margin: 25px auto;
+	display: flex;
+	justify-content: space-around;
+}
+
+.cell {
+	border: 1px solid black;
+	width: 25px;
+	height: 25px;
+}
+
+.alive {
+	background-color: yellow;
+}
+
+.dead {
+	background-color: grey;
+}
