@@ -19,19 +19,13 @@ class Game extends React.Component {
 	handleMutate(alteredCell) {
 		const cells = this.state.cells;
 		const alteredCellIndex = this.state.cells.findIndex(function(cell,index) {
-			if (cell.xCoordinate === alteredCell.xCoordinate && cell.yCoordinate === alteredCell.yCoordinate) {
-				return cell;
-			} else {
-				return false;
-			}
+			return (cell.xCoordinate === alteredCell.xCoordinate && cell.yCoordinate === alteredCell.yCoordinate);
 		});
 		cells[alteredCellIndex].alive = alteredCell.alive;
-		const neighbors = this.neighborStatuses(alteredCell);
-		console.log(neighbors);
 		this.setState({cells: cells});
 	}
 	findNeighbor(x, y) {
-		return this.state.cells.findIndex((neighbor) => (neighbor.xCoordinate === x && neighbor.yCoordinate === y) ? true : false);
+		return this.state.cells.findIndex((neighbor) => (neighbor.xCoordinate === x && neighbor.yCoordinate === y));
 	}
 	bottomLeftNeighbors(cell) {
 		const x = cell.xCoordinate;
@@ -56,39 +50,43 @@ class Game extends React.Component {
 		const y = cell.yCoordinate;
 		const n1 = this.findNeighbor(x - 1 < 0 ? 27 : x - 1, y + 1 > 19 ? 0 : y + 1);
 		const n2 = this.findNeighbor(x + 1 > 27 ? 0 : x + 1, y - 1 < 0 ? 19 : y - 1);
-		
+
 		return [n1, n2];
 	}
 	neighborStatuses(cell) {
 		const cells = this.state.cells;
 		let counter = 0;
 		const neighbors = this.topRightNeighbors(cell).concat(this.bottomLeftNeighbors(cell)).concat(this.topLeftAndBottomRightNeighbors(cell));
-		neighbors.forEach((cell,index,array) => {
-			if (cells[cell].alive) {
+		neighbors.forEach((cellIndex) => {
+			if (cells[cellIndex].alive) {
 				counter++;
 			}
 		});
 		return counter;
 	}
 	generationCycle() {
-		const cells = this.state.cells.map((cell,index,array) => {
-			const number = this.neighborStatuses(cell);
-			switch(number) {
-				case 0 || 1:
-					cell.alive = false;
-				break;
-				case ((2 || 3) && cell.alive):
-					cell.alive = true;
-				break;
+		const cells = this.state.cells.map(function(cell){
+			let newCell = {
+				xCoordinate : cell.xCoordinate,
+				yCoordinate : cell.yCoordinate
+			};
+			switch(this.neighborStatuses(cell)) {
+				case 0:
+				case 1:
+					newCell.alive = false;
+					break;
+				case 2:
+					cell.alive ? newCell.alive = true : newCell.alive = false;
+					break;
 				case 3:
-					cell.alive = true;
-				break;
+					newCell.alive = true;
+					break;
 				default:
-					cell.alive = false;
+					newCell.alive = false;
 			}
-		});
+			return newCell;
+		}.bind(this));
 		this.setState({cells : cells});
-
 	}
 	componentDidMount() {
 		const cells = this.state.cells;
@@ -97,45 +95,52 @@ class Game extends React.Component {
 		randomIndicies.forEach((value) => cells[value].alive = true);
 		this.setState({cells: cells});
 
-		this.generationCycle();
-		this.generationCycle();
-
-		// this.timerID = setInterval(
-		// 	() => this.generationCycle(),
-		// 	1000
-		// );
+		this.timerID = setInterval(
+			() => this.generationCycle(),
+			100
+		);
 	}
-
 	componentWillUnmount() {
 		clearInterval(this.timerID);
+		// const cells = this.state.cells.map(function(cell) {
+		// 	let newCell = {
+		// 		alive = false,
+		// 		xCoordinate = cell.xCoordinate,
+		// 		yCoordinate = cell.yCoordinate
+		// 	};
+		// 	return newCell;
+		// });
+		// this.setState({cells : cells});
+		console.log('component unmounted');
+	}
+	handlePause() {
+		console.log('pause');
 	}
 	render() {
 		return (
 			<div className="container">
-				<Board 
-					cells={this.state.cells} 
-					width={this.props.width} 
+				<Board
+					cells={this.state.cells}
+					width={this.props.width}
 					height={this.props.height}
 					onMutate={this.handleMutate.bind(this)} />
-				<div className="controls">
-					<ButtonControl name={'start'} onAction={this.componentDidMount.bind(this)} />
-					<ButtonControl name={'pause'} onAction={this.handlePause} />
-					<ButtonControl name={'clear'} onAction={this.componentWillUnmount.bind(this)} />
-				</div>
+				<ButtonControls
+					onStart={this.generationCycle.bind(this)}
+					onPause={this.handlePause.bind(this)}
+					onClear={this.componentWillUnmount.bind(this)} />
 			</div>
 		)
 	}
 }
 
-class ButtonControl extends React.Component {
-	handleClick() {
-		this.props.onAction();
-	}
+class ButtonControls extends React.Component {
 	render() {
 		return (
-			<button className="btn btn-lg btn-primary" onClick={this.handleClick.bind(this)} >
-				{this.props.name}
-			</button>
+			<div className="controls">
+				<button className="btn btn-lg btn-primary" onClick={this.props.onStart}>Start</button>
+				<button className="btn btn-lg btn-primary" onClick={this.props.onPause}>Pause</button>
+				<button className="btn btn-lg btn-primary" onClick={this.props.onClear}>Clear</button>
+			</div>
 		)
 	}
 }
@@ -144,10 +149,10 @@ class Board extends React.Component {
 	render() {
 		const cellNodes = this.props.cells.map(function(cell,i) {
 			return (
-				<Cell 
-					key={i} 
-					xCoordinate={cell.xCoordinate} 
-					yCoordinate={cell.yCoordinate} 
+				<Cell
+					key={i}
+					xCoordinate={cell.xCoordinate}
+					yCoordinate={cell.yCoordinate}
 					alive={cell.alive}
 					mutate={this.props.onMutate} />
 			)
@@ -165,11 +170,11 @@ class Cell extends React.Component {
 		const alive = !this.props.alive;
 		const x = this.props.xCoordinate;
 		const y = this.props.yCoordinate;
-		this.props.mutate({xCoordinate: x, yCoordinate: y, alive: alive });		
+		this.props.mutate({xCoordinate: x, yCoordinate: y, alive: alive });
 	}
 	render() {
-		const cellStatus = this.props.alive	
-			? <div className="cell alive" onClick={this.handleClick.bind(this)} /> 
+		const cellStatus = this.props.alive
+			? <div className="cell alive" onClick={this.handleClick.bind(this)} />
 			: <div className="cell dead" onClick={this.handleClick.bind(this)} />
 		return (cellStatus)
 	}
@@ -177,4 +182,3 @@ class Cell extends React.Component {
 
 
 ReactDOM.render(<Game size={560} width={28} height={20} />, document.getElementById('app'));
-
