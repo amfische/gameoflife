@@ -95,26 +95,32 @@ class Game extends React.Component {
 		randomIndicies.forEach((value) => cells[value].alive = true);
 		this.setState({cells: cells});
 
+		// this.timerID = setInterval(
+		// 	() => this.generationCycle(),
+		// 	100
+		// );
+	}
+	componentWillUnmount() {
+		clearInterval(this.timerID);
+		const cells = this.state.cells.map(function(cell) {
+			let newCell = {
+				alive : false,
+				xCoordinate : cell.xCoordinate,
+				yCoordinate : cell.yCoordinate
+			};
+			return newCell;
+		});
+		this.setState({cells : cells});
+		console.log('component unmounted');
+	}
+	handleStart() {
 		this.timerID = setInterval(
 			() => this.generationCycle(),
 			100
 		);
 	}
-	componentWillUnmount() {
-		clearInterval(this.timerID);
-		// const cells = this.state.cells.map(function(cell) {
-		// 	let newCell = {
-		// 		alive = false,
-		// 		xCoordinate = cell.xCoordinate,
-		// 		yCoordinate = cell.yCoordinate
-		// 	};
-		// 	return newCell;
-		// });
-		// this.setState({cells : cells});
-		console.log('component unmounted');
-	}
 	handlePause() {
-		console.log('pause');
+		clearInterval(this.timerID);
 	}
 	render() {
 		return (
@@ -125,7 +131,7 @@ class Game extends React.Component {
 					height={this.props.height}
 					onMutate={this.handleMutate.bind(this)} />
 				<ButtonControls
-					onStart={this.generationCycle.bind(this)}
+					onStart={this.handleStart.bind(this)}
 					onPause={this.handlePause.bind(this)}
 					onClear={this.componentWillUnmount.bind(this)} />
 			</div>
