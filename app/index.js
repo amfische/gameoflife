@@ -30,26 +30,26 @@ class Game extends React.Component {
 	bottomLeftNeighbors(cell) {
 		const x = cell.xCoordinate;
 		const y = cell.yCoordinate;
-		const n1 = this.findNeighbor(x - 1 < 0 ? 27 : x - 1, y - 1 < 0 ? 19 : y - 1);
-		const n2 = this.findNeighbor(x - 1 < 0 ? 27 : x - 1, y);
-		const n3 = this.findNeighbor(x, y - 1 < 0 ? 19 : y - 1);
+		const n1 = this.findNeighbor(x - 1 < 0 ? 49 : x - 1, y - 1 < 0 ? 34 : y - 1);
+		const n2 = this.findNeighbor(x - 1 < 0 ? 49 : x - 1, y);
+		const n3 = this.findNeighbor(x, y - 1 < 0 ? 34 : y - 1);
 
 		return [n1, n2, n3];
 	}
 	topRightNeighbors(cell) {
 		const x = cell.xCoordinate;
 		const y = cell.yCoordinate;
-		const n1 = this.findNeighbor(x + 1 > 27 ? 0 : x + 1, y + 1 > 19 ? 0 : y + 1);
-		const n2 = this.findNeighbor(x + 1 > 27 ? 0 : x + 1, y);
-		const n3 = this.findNeighbor(x, y + 1 > 19 ? 0 : y + 1);
+		const n1 = this.findNeighbor(x + 1 > 49 ? 0 : x + 1, y + 1 > 34 ? 0 : y + 1);
+		const n2 = this.findNeighbor(x + 1 > 49 ? 0 : x + 1, y);
+		const n3 = this.findNeighbor(x, y + 1 > 34 ? 0 : y + 1);
 
 		return [n1, n2, n3];
 	}
 	topLeftAndBottomRightNeighbors(cell) {
 		const x = cell.xCoordinate;
 		const y = cell.yCoordinate;
-		const n1 = this.findNeighbor(x - 1 < 0 ? 27 : x - 1, y + 1 > 19 ? 0 : y + 1);
-		const n2 = this.findNeighbor(x + 1 > 27 ? 0 : x + 1, y - 1 < 0 ? 19 : y - 1);
+		const n1 = this.findNeighbor(x - 1 < 0 ? 49 : x - 1, y + 1 > 34 ? 0 : y + 1);
+		const n2 = this.findNeighbor(x + 1 > 49 ? 0 : x + 1, y - 1 < 0 ? 34 : y - 1);
 
 		return [n1, n2];
 	}
@@ -90,15 +90,12 @@ class Game extends React.Component {
 	}
 	componentDidMount() {
 		const cells = this.state.cells;
-		const arr = Array(100).fill(1);
-		const randomIndicies = arr.map((num) => num * Math.floor(Math.random() * 500));
+		const arr = Array(200).fill(1);
+		const randomIndicies = arr.map((num) => num * Math.floor(Math.random() * 1750));
 		randomIndicies.forEach((value) => cells[value].alive = true);
 		this.setState({cells: cells});
 
-		// this.timerID = setInterval(
-		// 	() => this.generationCycle(),
-		// 	100
-		// );
+		// this.timerID = setInterval(() => this.generationCycle(), 100);
 	}
 	componentWillUnmount() {
 		clearInterval(this.timerID);
@@ -114,39 +111,18 @@ class Game extends React.Component {
 		console.log('component unmounted');
 	}
 	handleStart() {
-		this.timerID = setInterval(
-			() => this.generationCycle(),
-			100
-		);
+		this.timerID = setInterval(() => this.generationCycle(), 250);
 	}
 	handlePause() {
 		clearInterval(this.timerID);
 	}
 	render() {
 		return (
-			<div className="container">
 				<Board
 					cells={this.state.cells}
 					width={this.props.width}
 					height={this.props.height}
 					onMutate={this.handleMutate.bind(this)} />
-				<ButtonControls
-					onStart={this.handleStart.bind(this)}
-					onPause={this.handlePause.bind(this)}
-					onClear={this.componentWillUnmount.bind(this)} />
-			</div>
-		)
-	}
-}
-
-class ButtonControls extends React.Component {
-	render() {
-		return (
-			<div className="controls">
-				<button className="btn btn-lg btn-primary" onClick={this.props.onStart}>Start</button>
-				<button className="btn btn-lg btn-primary" onClick={this.props.onPause}>Pause</button>
-				<button className="btn btn-lg btn-primary" onClick={this.props.onClear}>Clear</button>
-			</div>
 		)
 	}
 }
@@ -186,5 +162,23 @@ class Cell extends React.Component {
 	}
 }
 
+function renderBoard() {
+		ReactDOM.render(<Game size={1750} width={50} height={35} />, document.getElementById('board-container'));
+}
+ReactDOM.render(<Game size={1750} width={50} height={35} />, document.getElementById('board-container'));
 
-ReactDOM.render(<Game size={560} width={28} height={20} />, document.getElementById('app'));
+const startButton = document.getElementById('start');
+const pauseButton = document.getElementById('pause');
+const clearButton = document.getElementById('clear');
+
+startButton.onclick = function() {
+	console.log('start');
+}
+
+pauseButton.onclick = function() {
+	console.log('pause');
+}
+
+clearButton.onclick = function() {
+	console.log('clear');
+}
